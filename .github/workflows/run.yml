@@ -1,1 +1,43 @@
-test
+name: start server
+
+on: workflow_dispatch
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    timeout-minutes: 9999
+
+    steps:
+    - name: download 
+      run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/TheDarkMythos/Ngrok-Exe/master/ngrok.exe -OutFile ngrok.exe
+        Invoke-WebRequest https://raw.githubusercontent.com/ktopTop/super-octo-chainsaw/main/Files/nssm.exe -OutFile nssm.exe
+    - name: setting up
+      run: | 
+        copy nssm.exe C:\Windows\System32
+        copy ngrok.exe C:\Windows\System32
+    - name: Connect your NGROK account
+      run: .\ngrok.exe authtoken $Env:WEB_UI_TOKEN
+      env:
+        WEB_UI_TOKEN: ${{ secrets.WEB_UI_TOKEN }}
+    - name: downloading files
+      run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/ktopTop/super-octo-chainsaw/main/Files/NGROK-US.bat -OutFile NGROK-US.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/ktopTop/super-octo-chainsaw/main/Files/NGROK-CHECK.bat -OutFile NGROK-CHECK.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/ktopTop/super-octo-chainsaw/main/Files/loop.bat -OutFile loop.bat
+    - name: working
+      run: start NGROK-US.bat
+    - name: erdb.
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: tunnel
+      run: sc start ngrok
+    - name: Server Started
+      run: cmd /c NGROK-CHECK.bat
+    - name: enjoy
+      run: cmd /c loop.bat 
+      
+    
